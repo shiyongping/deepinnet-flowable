@@ -6,10 +6,10 @@
 
 <script>
 export default {
-  name: 'RuoYiDoc',
+  name: 'Doc',
   data() {
     return {
-      url: 'https://www.yuque.com/u1024153/icipor/vh4wfl'
+      url: 'https://gitee.com/shiyongping/flowable'
     }
   },
   methods: {

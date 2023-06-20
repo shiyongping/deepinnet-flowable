@@ -6,10 +6,10 @@
 
 <script>
 export default {
-  name: 'RuoYiGit',
+  name: 'Git',
   data() {
     return {
-      url: 'https://gitee.com/tony2y/RuoYi-flowable'
+      url: 'https://gitee.com/shiyongping/flowable'
     }
   },
   methods: {
