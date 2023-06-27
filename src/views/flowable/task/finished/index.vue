@@ -49,8 +49,8 @@
           <label>{{scope.row.startUserName}} <el-tag type="info" size="mini">{{scope.row.startDeptName}}</el-tag></label>
         </template>
       </el-table-column>
-      <el-table-column label="接收时间" align="center" prop="createTime" width="180"/>
-      <el-table-column label="审批时间" align="center" prop="finishTime" width="180"/>
+      <el-table-column label="任务发起时间" align="center" prop="createTime" width="180"/>
+      <el-table-column label="任务结束时间" align="center" prop="finishTime" width="180"/>
       <el-table-column label="耗时" align="center" prop="duration" width="180"/>
       <el-table-column label="操作" width="150" fixed="right" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -59,14 +59,14 @@
             type="text"
             icon="el-icon-tickets"
             @click="handleFlowRecord(scope.row)"
-          >流转记录</el-button>
-           <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-refresh-left"
-            @click="handleRevoke(scope.row)"
-          >撤回
-          </el-button>
+          >详情</el-button>
+<!--           <el-button-->
+<!--            size="mini"-->
+<!--            type="text"-->
+<!--            icon="el-icon-refresh-left"-->
+<!--            @click="handleRevoke(scope.row)"-->
+<!--          >撤回-->
+<!--          </el-button>-->
         </template>
       </el-table-column>
     </el-table>

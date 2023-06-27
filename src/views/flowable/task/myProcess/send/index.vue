@@ -8,16 +8,23 @@
       <el-tabs  tab-position="top" v-model="activeName"  @tab-click="handleClick">
         <!--表单信息-->
         <el-tab-pane label="表单信息" name="1">
-            <!--初始化流程加载表单信息-->
-            <el-col :span="16" :offset="4">
-              <div class="test-form">
-                <parser :key="new Date().getTime()" :form-conf="formConf" @submit="submitForm" ref="parser" @getData="getData" />
+          <!--初始化流程加载表单信息-->
+          <el-col :span="16" :offset="4">
+            <div class="test-form">
+              <parser :key="new Date().getTime()" :form-conf="formConf" @submit="submitForm" ref="parser"
+                      @getData="getData"/>
+            </div>
+              <div  style="margin-left:15%;margin-bottom: 20px;font-size: 14px;">
+                <el-button v-if="!formKeyExist" type="primary" icon="el-icon-edit-outline"  size="mini" @click="submitForm">提 交</el-button>
+                <el-button v-if="!formKeyExist" type="success"  icon="el-icon-edit-outline"  size="mini"
+                           @click="resetForm">取 消
+                </el-button>
               </div>
-            </el-col>
+          </el-col>
         </el-tab-pane>
         <!--流程图-->
         <el-tab-pane label="流程图" name="2">
-           <flow :flowData="flowData"/>
+          <flow :flowData="flowData"/>
         </el-tab-pane>
       </el-tabs>
       <!--选择流程接收人-->
@@ -25,8 +32,8 @@
         <flow-user v-if="checkSendUser" :checkType="checkType"  @handleUserSelect="handleUserSelect"/>
         <flow-role v-if="checkSendRole" @handleRoleSelect="handleRoleSelect"/>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="taskOpen = false">取 消</el-button>
-          <el-button type="primary" @click="submitTask">提 交</el-button>
+          <el-button type="primary" @click="taskOpen = false">取 消</el-button>
+          <el-button type="primary" @click="handleComplete">提 交</el-button>
         </span>
       </el-dialog>
     </el-card>
@@ -41,6 +48,8 @@ import {flowFormData} from "@/api/flowable/process";
 import {getNextFlowNodeByStart} from "@/api/flowable/todo";
 import FlowUser from '@/components/flow/User'
 import FlowRole from '@/components/flow/Role'
+import router from "@/router";
+import {deepClone} from "@/utils";
 
 export default {
   name: "Record",
@@ -64,12 +73,30 @@ export default {
       queryParams: {
         deptId: undefined
       },
+      taskForm: {
+        returnTaskShow: false, // 是否展示回退表单
+        delegateTaskShow: false, // 是否展示回退表单
+        defaultTaskShow: true, // 默认处理
+        comment: "", // 意见内容
+        procInsId: "", // 流程实例编号
+        instanceId: "", // 流程实例编号
+        deployId: "",  // 流程定义编号
+        formBtns : "",  // 流程定义编号
+        taskId: "",// 流程任务编号
+        procDefId: "",  // 流程编号
+        targetKey: "",
+        variables: {
+          variables: {}
+        },
+      },
       // 遮罩层
       loading: true,
       deployId: "",  // 流程定义编号
       procDefId: "",  // 流程实例编号
       formConf: {}, // 默认表单数据
-      variables: [], // 流程变量数据
+      variables: {
+        variables: {}
+      },  // 流程变量数据,
       taskTitle: null,
       taskOpen: false,
       checkSendUser: false, // 是否展示人员选择模块
@@ -77,7 +104,8 @@ export default {
       checkType: '', // 选择类型
       checkValues: null, // 选中任务接收人员数据
       formData: {}, // 填写的表单数据,
-      multiInstanceVars: '' // 会签节点
+      multiInstanceVars: '', // 会签节点
+      formKeyExist: true // 当前节点是否存在表单
     };
   },
   created() {
@@ -100,8 +128,10 @@ export default {
       const that = this
       const params = {deployId: deployId}
       flowFormData(params).then(res => {
+        debugger
         // 流程过程中不存在初始化表单 直接读取的流程变量中存储的表单值
           that.formConf = res.data;
+          that.formKeyExist= res.data.formBtns
       }).catch(res => {
         this.goBack();
       })
@@ -109,8 +139,10 @@ export default {
     /** 返回页面 */
     goBack() {
       // 关闭当前标签页并返回上个页面
-      const obj = { path: "/task/process", query: { t: Date.now()} };
-      this.$tab.closeOpenPage(obj);
+      const obj = { path: "/flowable/task/myProcess/index", query: { pageNum: 1,
+          pageSize: 10
+      } };
+       this.$tab.closeOpenPage(obj);
     },
     /** 接收子组件传的值 */
     getData(data) {
@@ -134,8 +166,15 @@ export default {
         this.variables = variables;
       }
     },
+    /** 加载审批任务弹框 */
+    handleComplete() {
+      // this.completeOpen = true;
+      // this.completeTitle = "流程审批";
+      this.submitForm(null);
+    },
     /** 申请流程表单数据提交 */
     submitForm(formData) {
+      debugger
       // 根据当前任务或者流程设计配置的下一步节点 todo 暂时未涉及到考虑网关、表达式和多节点情况
       getNextFlowNodeByStart({deploymentId: this.deployId,variables:formData.valData}).then(res => {
         const data = res.data;
@@ -159,14 +198,14 @@ export default {
             this.taskOpen = true;
             this.taskTitle = "选择任务接收";
           } else {
-            const variables = this.formData.valData;
-            const formData = this.formData.formData;
-            formData.disabled = true;
+            const formData = deepClone(this.formConf);
+            this.variables.variables = formData.formModel;
+            // 表单是否禁用
+            formData.disabled = false;
+            // 是否显示按钮
             formData.formBtns = false;
             if (this.procDefId) {
-              variables.variables = formData;
-              // 启动流程并将表单数据加入流程变量
-              definitionStart(this.procDefId, JSON.stringify(variables)).then(res => {
+              definitionStart(this.procDefId, JSON.stringify(this.variables)).then(res => {
                 this.$modal.msgSuccess(res.msg);
                 this.goBack();
               })
@@ -177,6 +216,7 @@ export default {
     },
     /** 提交流程 */
     submitTask() {
+      debugger
       if (!this.checkValues && this.checkSendUser){
         this.$modal.msgError("请选择任务接收!");
         return;
@@ -186,21 +226,18 @@ export default {
         return;
       }
       if (this.formData) {
-        const variables = this.formData.valData;
-        const formData = this.formData.formData;
+        const variables = this.formConf.formModel;
+        const formData = deepClone(this.formConf);
+        debugger
         // 表单是否禁用
         formData.disabled = true;
         // 是否显示按钮
         formData.formBtns = false;
-        variables.variables = formData;
-        if (this.multiInstanceVars) {
-          this.$set(variables, this.multiInstanceVars, this.checkValues);
-        } else {
-          this.$set(variables, "approval", this.checkValues);
-        }
         console.log(variables,"流程发起提交表单数据")
+        debugger
         // 启动流程并将表单数据加入流程变量
         definitionStart(this.procDefId, JSON.stringify(variables)).then(res => {
+          debugger
           this.$modal.msgSuccess(res.msg);
           this.goBack();
         })

@@ -52,7 +52,14 @@
     <el-table v-loading="loading" :data="myProcessList" border @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="流程编号" align="center" prop="procInsId" :show-overflow-tooltip="true"/>
-      <el-table-column label="流程名称" align="center" prop="procDefName" :show-overflow-tooltip="true"/>
+<!--      <el-table-column label="流程名称" align="center" prop="procDefName" :show-overflow-tooltip="true"/>-->
+      <el-table-column label="流程名称" align="center"  width="120" :show-overflow-tooltip="true">
+        <template slot-scope="scope">
+          <el-button type="text" @click="handleReadImage(scope.row.procInsId,scope.row.deployId)">
+            <span>{{ scope.row.procDefName }}</span>
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="流程类别" align="center" prop="category" width="100px" />
       <el-table-column label="流程版本" align="center" width="80px">
         <template slot-scope="scope">
@@ -77,7 +84,7 @@
       <el-table-column label="操作" width="150" fixed="right" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button @click="handleFlowRecord(scope.row)" type="text" size="small">详情</el-button>
-          <el-button @click="handleStop(scope.row)" type="text" size="small">取消申请</el-button>
+          <el-button @click="handleStop(scope.row)" type="text" size="small">终止</el-button>
           <el-button @click="handleDelete(scope.row)" type="text" size="small" v-hasPermi="['system:deployment:remove']">删除</el-button>
         </template>
       </el-table-column>
@@ -136,6 +143,11 @@
       />
     </el-dialog>
 
+    <!-- 流程图 -->
+    <el-dialog :title="readImage.title" :visible.sync="readImage.open" width="70%" append-to-body>
+      <!-- <el-image :src="readImage.src"></el-image> -->
+      <flow :flowData="flowData"/>
+    </el-dialog>
   </div>
 </template>
 
@@ -149,10 +161,12 @@ import {
   flowRecord
 } from "@/api/flowable/finished";
 import { myProcessList,stopProcess } from "@/api/flowable/process";
-import {listDefinition} from "@/api/flowable/definition";
+import {flowXmlAndNode, listDefinition} from "@/api/flowable/definition";
+import flow from "@/views/flowable/task/myProcess/send/flow";
 export default {
   name: "Deploy",
   components: {
+    flow
   },
   data() {
     return {
@@ -177,6 +191,10 @@ export default {
       // 是否显示弹出层
       open: false,
       src: "",
+      readImage:{
+        open: false,
+        src: "",
+      },
       definitionList:[],
       // 查询参数
       queryParams: {
@@ -206,6 +224,9 @@ export default {
         parentDeploymentId: null,
         engineVersion: null
       },
+      deployId: '',
+      // xml
+      flowData: {},
       // 表单参数
       form: {},
       // 表单校验
@@ -288,6 +309,7 @@ export default {
     },
     /**  发起流程申请 */
     handleStartProcess(row){
+      debugger
       this.$router.push({ path: '/flowable/task/myProcess/send/index',
         query: {
           deployId: row.deploymentId,
@@ -370,6 +392,20 @@ export default {
       }).then(response => {
         this.download(response.msg);
       })
+    },
+    /** 流程图查看 */
+    handleReadImage(procInsId,deployId){
+      debugger
+      this.readImage.title = "流程图";
+      this.readImage.open = true;
+      debugger
+      flowXmlAndNode({procInsId:procInsId,deployId:deployId}).then(res => {
+        this.flowData = res.data;
+      })
+      // flowXmlAndNode({deployId:deployId}).then(res => {
+      //   debugger
+      //   this.flowData = res.data;
+      // })
     }
   }
 };

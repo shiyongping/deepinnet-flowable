@@ -294,6 +294,7 @@ export default {
     },
     /** 流程流转记录 */
     getFlowRecordList(procInsId, deployId) {
+      debugger
       const that = this
       const params = {procInsId: procInsId, deployId: deployId}
       flowRecord(params).then(res => {
@@ -324,6 +325,7 @@ export default {
       if (taskId) {
         // 提交流程申请时填写的表单存入了流程变量中后续任务处理时需要展示
         flowTaskForm({taskId: taskId}).then(res => {
+          debugger
           this.variablesData = res.data.formData;
           this.taskForm.variables = res.data.formData;
           this.formKeyExist = res.data.formKeyExist;

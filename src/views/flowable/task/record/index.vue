@@ -9,6 +9,7 @@
       <!--流程处理表单模块-->
       <el-col :span="16" :offset="6" v-if="variableOpen">
           <div>
+            <span class="el-icon-notebook-1">操作按钮</span>
             <parser :key="new Date().getTime()" :form-conf="variablesData" />
           </div>
           <div style="margin-left:10%;margin-bottom: 20px;font-size: 14px;" v-if="finished === 'true'">
@@ -56,11 +57,11 @@
                         {{item.candidate}}
                       </el-descriptions-item>
                       <el-descriptions-item label-class-name="my-label">
-                        <template slot="label"><i class="el-icon-date"></i>接收时间</template>
+                        <template slot="label"><i class="el-icon-date"></i>任务开始时间</template>
                         {{item.createTime}}
                       </el-descriptions-item>
                       <el-descriptions-item v-if="item.finishTime" label-class-name="my-label">
-                        <template slot="label"><i class="el-icon-date"></i>处理时间</template>
+                        <template slot="label"><i class="el-icon-date"></i>任务处理时间</template>
                         {{item.finishTime}}
                       </el-descriptions-item>
                       <el-descriptions-item v-if="item.duration"  label-class-name="my-label">
@@ -259,7 +260,7 @@ export default {
       formConfOpen: false, // 是否加载默认表单数据
       variables: [], // 流程变量数据
       variablesData: {}, // 流程变量数据
-      variableOpen: false, // 是否加载流程变量数据
+      variableOpen: true, // 是否加载流程变量数据
       returnTaskList: [],  // 回退列表数据
       finished: 'false',
       completeTitle: null,
@@ -290,7 +291,8 @@ export default {
       this.taskForm.deployId = null
     }
     this.getFlowRecordList( this.taskForm.procInsId, this.taskForm.deployId);
-    this.finished =  this.$route.query && this.$route.query.finished
+    debugger
+    this.finished =  false
   },
   methods: {
     /** 查询部门下拉树结构 */

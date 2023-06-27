@@ -43,7 +43,7 @@
     <el-table v-loading="loading" :data="todoList" border @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center"/>
       <el-table-column label="任务编号" align="center" prop="taskId" :show-overflow-tooltip="true"/>
-      <el-table-column label="流程名称" align="center" prop="procDefName"/>
+      <el-table-column label="当前任务" align="center" prop="procDefName"/>
       <el-table-column label="当前节点" align="center" prop="taskName"/>
       <el-table-column label="流程版本" align="center">
         <template slot-scope="scope">
@@ -55,7 +55,7 @@
           <label>{{scope.row.startUserName}} <el-tag type="info" size="mini">{{scope.row.startDeptName}}</el-tag></label>
         </template>
       </el-table-column>
-      <el-table-column label="接收时间" align="center" prop="createTime" width="180"/>
+      <el-table-column label="任务发起时间" align="center" prop="createTime" width="180"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -63,7 +63,7 @@
             type="text"
             icon="el-icon-edit-outline"
             @click="handleProcess(scope.row)"
-          >处理
+          >办理
           </el-button>
         </template>
       </el-table-column>

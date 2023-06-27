@@ -133,6 +133,19 @@ export const constantRoutes = [
     hidden: true,
     children: [
       {
+        path: 'task/myProcess/index',
+        component: () => import('@/views/flowable/task/myProcess/index'),
+        name: 'RecordIndex',
+        meta: { title: '流程实例', icon: '' }
+      }
+    ]
+  },
+  {
+    path: '/flowable',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
         path: 'task/myProcess/send/index',
         component: () => import('@/views/flowable/task/myProcess/send/index'),
         name: 'SendRecord',
@@ -148,6 +161,19 @@ export const constantRoutes = [
       {
         path: 'task/todo/detail/index',
         component: () => import('@/views/flowable/task/todo/detail/index'),
+        name: 'TodoRecord',
+        meta: { title: '流程处理', icon: '' }
+      }
+    ]
+  },
+  {
+    path: '/flowable',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'task/record/index',
+        component: () => import('@/views/flowable/task/record/index'),
         name: 'TodoRecord',
         meta: { title: '流程处理', icon: '' }
       }
