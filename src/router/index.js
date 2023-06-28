@@ -192,6 +192,19 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/system',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'role/selectUser',
+        component: () => import('@/views/system/role/selectUser'),
+        name: 'AuthUserInfo',
+        meta: { title: '分配用户', icon: '' }
+      }
+    ]
+  },
 ]
 
 // 动态路由，基于用户权限动态去加载

@@ -199,11 +199,11 @@ export default {
             this.taskTitle = "选择任务接收";
           } else {
             const formData = deepClone(this.formConf);
-            this.variables.variables = formData.formModel;
+            this.variables.variables = formData;
             // 表单是否禁用
             formData.disabled = false;
             // 是否显示按钮
-            formData.formBtns = false;
+            formData.formBtns = true;
             if (this.procDefId) {
               definitionStart(this.procDefId, JSON.stringify(this.variables)).then(res => {
                 this.$modal.msgSuccess(res.msg);

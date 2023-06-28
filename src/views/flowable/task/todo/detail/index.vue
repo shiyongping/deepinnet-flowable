@@ -20,11 +20,21 @@
               <el-button v-if="!formKeyExist" icon="el-icon-edit-outline" type="success" size="mini"
                          @click="handleComplete">审批
               </el-button>
-              <!--                <el-button  icon="el-icon-edit-outline" type="primary" size="mini" @click="handleDelegate">委派</el-button>-->
-              <!--                <el-button  icon="el-icon-edit-outline" type="primary" size="mini" @click="handleAssign">转办</el-button>-->
-              <!--                <el-button  icon="el-icon-edit-outline" type="primary" size="mini" @click="handleDelegate">签收</el-button>-->
-              <!--              <el-button icon="el-icon-refresh-left" type="warning" size="mini" @click="handleReturn">退回</el-button>-->
-              <!--              <el-button icon="el-icon-circle-close" type="danger" size="mini" @click="handleReject">驳回</el-button>-->
+              <el-button v-if="!formKeyExist" icon="el-icon-edit-outline" type="primary" size="mini"
+                         @click="handleDelegate">委派
+              </el-button>
+              <el-button v-if="!formKeyExist" icon="el-icon-edit-outline" type="primary" size="mini"
+                         @click="handleAssign">转办
+              </el-button>
+<!--              <el-button v-if="!formKeyExist" icon="el-icon-edit-outline" type="primary" size="mini"-->
+<!--                         @click="handleDelegate">签收-->
+<!--              </el-button>-->
+              <el-button v-if="!formKeyExist" icon="el-icon-refresh-left" type="warning" size="mini"
+                         @click="handleReturn">退回
+              </el-button>
+              <el-button v-if="!formKeyExist" icon="el-icon-circle-close" type="danger" size="mini"
+                         @click="handleReject">驳回
+              </el-button>
             </div>
           </el-col>
         </el-tab-pane>
@@ -35,10 +45,10 @@
             <div class="block">
               <el-timeline>
                 <el-timeline-item
-                  v-for="(item,index ) in flowRecordList"
-                  :key="index"
-                  :icon="setIcon(item.finishTime)"
-                  :color="setColor(item.finishTime)"
+                    v-for="(item,index ) in flowRecordList"
+                    :key="index"
+                    :icon="setIcon(item.finishTime)"
+                    :color="setColor(item.finishTime)"
                 >
                   <p style="font-weight: 700">{{ item.taskName }}</p>
                   <el-card :body-style="{ padding: '10px' }">
@@ -103,9 +113,9 @@
           <el-form-item label="退回节点" prop="targetKey">
             <el-radio-group v-model="taskForm.targetKey">
               <el-radio-button
-                v-for="item in returnTaskList"
-                :key="item.id"
-                :label="item.id"
+                  v-for="item in returnTaskList"
+                  :key="item.id"
+                  :label="item.id"
               >{{ item.name }}
               </el-radio-button>
             </el-radio-group>
@@ -134,6 +144,7 @@
           </span>
       </el-dialog>
     </el-card>
+    <select-user ref="select" :roleId="queryParams.roleId":taskId="queryParams.taskId":userId="queryParams.userId":triggered="triggered"  @ok="handleSelected" />
   </div>
 </template>
 
@@ -155,6 +166,8 @@ import {
 import flow from '@/views/flowable/task/todo/detail/flow'
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 import {listUser} from "@/api/system/user";
+import {allocatedUserList} from "@/api/system/role";
+import selectUser from "./selectUser";
 
 export default {
   name: "Record",
@@ -163,6 +176,7 @@ export default {
     flow,
     FlowUser,
     FlowRole,
+    selectUser
   },
   props: {},
   data() {
@@ -180,9 +194,17 @@ export default {
         children: "children",
         label: "label"
       },
+      triggered: false, // 是否触发委办
       // 查询参数
       queryParams: {
-        deptId: undefined
+        pageNum: 1,
+        pageSize: 10,
+        roleId: undefined,
+        userName: undefined,
+        phonenumber: undefined,
+        deptId: undefined,
+        taskId:undefined,
+        userId:undefined
       },
       // 遮罩层
       loading: true,
@@ -242,8 +264,19 @@ export default {
         this.getFlowTaskForm(this.taskForm.taskId)
       }
       this.getFlowRecordList(this.taskForm.procInsId, this.taskForm.deployId);
+      debugger
+      const roleId = this.$route.query.roleId;
+      const taskId = this.$route.query.taskId;
+      const userId = this.$route.query.userId;
+      if (roleId) {
+        this.queryParams.roleId = roleId;
+        this.queryParams.taskId = taskId;
+        this.queryParams.userId = userId;
+        this.getList();
+      }
     }
   },
+
   methods: {
     handleClick(tab, event) {
       if (tab.name === '3') {
@@ -281,6 +314,21 @@ export default {
         }
       }
     },
+    /** 搜索按钮操作 */
+    handleSelected() {
+      this.goBack();
+    },
+    /** 查询授权用户列表 */
+    getList() {
+      debugger
+      this.loading = true;
+      allocatedUserList(this.queryParams).then(response => {
+          this.userList = response.rows;
+          this.total = response.total;
+          this.loading = false;
+        }
+      );
+    },
     // 角色信息选中数据
     handleRoleSelect(selection) {
       if (selection) {
@@ -294,7 +342,6 @@ export default {
     },
     /** 流程流转记录 */
     getFlowRecordList(procInsId, deployId) {
-      debugger
       const that = this
       const params = {procInsId: procInsId, deployId: deployId}
       flowRecord(params).then(res => {
@@ -325,7 +372,6 @@ export default {
       if (taskId) {
         // 提交流程申请时填写的表单存入了流程变量中后续任务处理时需要展示
         flowTaskForm({taskId: taskId}).then(res => {
-          debugger
           this.variablesData = res.data.formData;
           this.taskForm.variables = res.data.formData;
           this.formKeyExist = res.data.formKeyExist;
@@ -373,16 +419,19 @@ export default {
     },
     /** 委派任务 */
     handleDelegate() {
+      debugger
       this.taskForm.delegateTaskShow = true;
       this.taskForm.defaultTaskShow = false;
+      this.triggered = !this.triggered;
+      this.$refs.select.show();
     },
     handleAssign() {
-
+      this.$refs.select.show();
     },
     /** 返回页面 */
     goBack() {
       // 关闭当前标签页并返回上个页面
-      const obj = { path: "/task/todo", query: { t: Date.now()} };
+      const obj = {path: "/task/todo", query: {t: Date.now()}};
       this.$tab.closeOpenPage(obj);
     },
     /** 驳回任务 */

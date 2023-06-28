@@ -458,17 +458,6 @@ export default {
       this.executionListenerLength = this.element.businessObject.extensionElements?.values
         ?.filter(item => item.$type === 'flowable:ExecutionListener').length ?? 0
     },
-    computedTaskListenerLength() {
-      this.taskListenerLength = this.element.businessObject.extensionElements?.values
-        ?.filter(item => item.$type === 'flowable:TaskListener').length ?? 0
-    },
-    computedHasMultiInstance() {
-      if (this.element.businessObject.loopCharacteristics) {
-        this.hasMultiInstance = true
-      } else {
-        this.hasMultiInstance = false
-      }
-    },
     // 获取表单信息
     getListForm(){
       listAllForm().then(res =>{

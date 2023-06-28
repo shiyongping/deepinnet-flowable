@@ -45,6 +45,23 @@ export function rejectTask(data) {
   })
 }
 
+// 转办任务
+export function assign(data) {
+  return request({
+    url: '/flowable/task/assign',
+    method: 'post',
+    data: data
+  })
+}
+// 委派任务
+export function delegate(data) {
+  return request({
+    url: '/flowable/task/delegate',
+    method: 'post',
+    data: data
+  })
+}
+
 // 可退回任务列表
 export function returnList(data) {
   return request({

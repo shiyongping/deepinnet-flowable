@@ -144,11 +144,13 @@ export default {
     handleProcess(row){
       this.$router.push({ path: '/flowable/task/todo/detail/index',
         query: {
+          roleId:row.assigneeRoleId,
           procInsId: row.procInsId,
           executionId: row.executionId,
           deployId: row.deployId,
           taskId: row.taskId,
           taskName: row.taskName,
+          userId: row.startUserId,
           startUser: row.startUserName + '-' + row.startDeptName,
         }})
     },
